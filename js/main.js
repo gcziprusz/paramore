@@ -4,20 +4,15 @@ var loaderModule = {
     	videoContainer: "bg",
   		videoId:"bg_video",
   		videoName:"bg",
-  		mobileBreakpoint:750,
-  		disableVideo:false
-  	},
-	disableVideoBackground:function(){
-  			this.config.disableVideo = true;	
+  		mobileBreakpoint:700
   	},
   	loadBackgroundVideo: function () {
-  		if(!this.config.disableVideo){
-			$('<video id="'+this.config.videoId+'" autoplay loop></video>')
-    			.append('<source src="videos/'+this.config.videoName+'.mp4" type="video/mp4" />')
-    			.append('<source src="videos/'+this.config.videoName+'.webm" type="video/webm" />')
-    			.append('<source src="videos/'+this.config.videoName+'.ogv" type="video/ogg" />')
-    			.appendTo($('#'+this.config.videoContainer+''));
-  		}
+  		$("#"+this.config.videoContainer).html(
+    	'<video id="'+this.config.videoId+'" autoplay loop>' +
+       		'<source src="videos/'+this.config.videoName+'.mp4"  type="video/mp4" />' +
+        	'<source src="videos/'+this.config.videoName+'.webm" type="video/webm" />' +
+        	'<source src="videos/'+this.config.videoName+'.ogv"  type="video/ogg" />' +
+    	'</video>');
   	},
   	isLargeScreen:function(){
 		return (window.innerWidth > this.config.mobileBreakpoint) ? true : false;
@@ -36,6 +31,7 @@ var sliderModule = {
   	},
   	sliderOptions:{
   		largeScreen:{
+  				mode:"fade",
 				slideWidth:600,
   				buildPager: function(slideIndex){
     				switch(slideIndex){
@@ -51,14 +47,17 @@ var sliderModule = {
   				}
 		},
 		smallScreen:{
+			mode:"fade",
 			slideWidth:300,
 			pager:false
 		}
   	},
-  	setSliderType:function(tpe){
-  		this.config.sliderType=tpe;
+  	setSliderType:function(){	
+  		this.config.sliderType = (loaderModule.isLargeScreen()) ? "large" : "small";
   	},
   	setupSlider:function(){
+   		this.setSliderType();
+
   		var dis = this;
   		$(document).on( "click", this.config.sliderInitEl, function() {
   			if(dis.config.sliderCached){
@@ -103,10 +102,11 @@ var sliderModule = {
 };
 /**INIT**/
 $(function() {
-	if(!loaderModule.isLargeScreen()){
-   		loaderModule.disableVideoBackground();
-   		sliderModule.setSliderType("small");
-	}
-	loaderModule.loadBackgroundVideo();
 	sliderModule.setupSlider();
+	
+	/** load video background in 
+		modern desktop browsers **/
+	if(!Modernizr.touch && Modernizr.video){
+		loaderModule.loadBackgroundVideo();
+	}
 });
